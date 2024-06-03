@@ -1,12 +1,13 @@
 class Account:
-    def __init__(self,number,pin,owner,name):
+    def __init__(self,number,pin,name):
         self.number = number
         self.__pin = pin
         self.name = name
         self._balance = 0
         self.transactions = []
-        self.overdraft_limit = None
-        self.is_frozen = False
+        self.overdraft_limit = 0
+        self._frozen = True
+        self._minimum_balance = 0
     
     def check_balance(self,pin):
         if pin == self.__pin:
@@ -14,12 +15,19 @@ class Account:
         else:
             return "Wrong pin"
         
-    def deposit(self,amount):
-        self._balance += amount
-        print(f"You have successfully deosited {amount}")
+    def deposit(self,amount,pin):
+        if pin == self.__pin:
+           self._balance += amount
+           self.transactions.append(f"Deposit: {amount}")
+           print(f"You have successfully deposited {amount}")
+        else:
+           return "The pin you have entered is incorrect. Enter your pin again"
+    
+    
 
-    def withdraw(self,amount):
-        if amount > 0 and amount <= self._balance:
+    def withdraw(self,amount,pin):
+        if pin == self.__pin:
+           if amount > 0 and amount <= self._balance:
             self._balance -= amount
             print(f"Withdrawal is successful. Your new balance is {self._balance}")
         elif amount > self._balance:
@@ -27,34 +35,80 @@ class Account:
         else:
             print("Invalid amount")
         
-    def view_details(self):
-        print(f"Account number: {self.number}")
-        print(f"Current balance: {self._balance}")
+    def view_details(self,pin):
+        if pin == self.__pin:
+           print(f"Account number: {self.number}")
+           print(f"Current balance: {self._balance}")
+        else:
+            print("The pin you have entered is incorrect. Enter your pin")
     
-    def change_ownership(self, new_name, new_pin):
-        self.name = new_name
-        self.pin = new_pin
-        print(f"Account name updated to: {self.name} and pin has been updated to {self.__pin}")
+    def change_owner_details(self,pin,new_name, new_pin,new_number):
+        if pin == self.__pin:
+           self.name = new_name
+           self.__pin = new_pin
+           self.number = new_number
+        print(f"Account name updated to: {self.name}, your new pin is {self.__pin} and the new account number is {self.number}")
 
-    def generate_statements(self):
-        print("\nTransaction History:")
-        for transaction in self.transactions:
-            print(f"{transaction['transaction_type']}: ${transaction['amount']} - New Balance: ${transaction['new_balance']}")
+    def generate_statements(self,pin):
+        if pin == self.__pin:
+           return "\n".join(self.transactions)
+            
+    def set_overdraft_limit(self, pin,new_limit):
+        if pin == self.__pin:
+            self.overdraft_limit = new_limit
+            print(f"Overdraft limit is: {self.overdraft_limit}")
+        else:
+            print("You have entered a wrong pin")        
+
+    def calculate_interest(self, pin,rate):
+        if pin == self.__pin:
+           interest = self._balance * rate/100
+           self._balance+=interest
+           print(f"Interest is {interest}")
+           self.transactions.append(f"Interest: {interest}")
+        else:
+           print("You have entered a wrong pin")
+        
+    def freeze_account(self,pin):
+        if pin == self.__pin:
+           self._frozen = True
+        else:
+            print("You have entered the wrong pin")
+
+    def unfreeze_account(self,pin):
+        if pin == self.__pin:
+            self._frozen = False
+        else:
+            print("You have entered the wrong pin")
     
-    def set_overdraft_limit(self, new_limit):
-        self.overdraft_limit = new_limit
-        print(f"Overdraft limit is: {self.overdraft_limit}")
+    def set_minimum_balance(self, pin, minimum_balance):
+        if pin == self.__pin:
+            self._minimum_balance = minimum_balance
+        else:
+            print("You have entered a wrong pin")
 
-    def calculate_interest(self, rate):
-        interest = self._balance * rate/100
-        self.deposit(interest)
-        print(f"Interest is {interest}")
+    def transfer_funds(self,pin,amount,recipient_account):
+        if pin == self.__pin:
+            if self._balance - amount >= self.overdraft_limit:
+                self._balance -= amount
+                recipient_account._balance += amount
+                self.transactions.append(f"Transfer {amount} to {recipient_account}")
+            else:
+                print("Insufficient funds")
+        else: 
+                print("Wrong pin")
+    
+    def close_account(self,pin):
+        if pin == self.__pin:
+            if self._balance == 0:
+                print("Account has been closed successfully")
+            else:
+                print("Confirm if you want to close your account")
+        else:
+            print("Wrong pin")
 
-    def freeze_account(self):
-        self.is_frozen = True
+                       
 
-    def unfreeze_account(self):
-        self.is_frozen = False
 
     
 
