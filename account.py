@@ -26,14 +26,13 @@ class Account:
     
 
     def withdraw(self,amount,pin):
-        if pin == self.__pin:
-           if amount > 0 and amount <= self._balance:
+        if pin != self.__pin:
+            print("Invalid pin")
+        if amount > self._balance:
+            print("insufficient funds")
             self._balance -= amount
-            print(f"Withdrawal is successful. Your new balance is {self._balance}")
-        elif amount > self._balance:
-            print("Cannot withdraw due to insufficient funds")
         else:
-            print("Invalid amount")
+            print(f"You have withdrawn {amount} and your balance is {self._balance}")        
         
     def view_details(self,pin):
         if pin == self.__pin:
@@ -81,23 +80,22 @@ class Account:
         else:
             print("You have entered the wrong pin")
     
-    def set_minimum_balance(self, pin, minimum_balance):
-        if pin == self.__pin:
+    def set_minimum_balance(self,minimum_balance):
             self._minimum_balance = minimum_balance
-        else:
-            print("You have entered a wrong pin")
+            return self._minimum_balance
 
     def transfer_funds(self,pin,amount,recipient_account):
         if pin == self.__pin:
             if self._balance - amount >= self.overdraft_limit:
                 self._balance -= amount
                 recipient_account._balance += amount
-                self.transactions.append(f"Transfer {amount} to {recipient_account}")
+                self.transactions.append(f"Transfer to {recipient_account}: {amount}")
+                recipient_account.append(f"Transfer from {self.number}: {amount}")
             else:
-                print("Insufficient funds")
-        else: 
-                print("Wrong pin")
-    
+                return "Insufficient funds"
+        else:
+            return "Wrong pin"
+        
     def close_account(self,pin):
         if pin == self.__pin:
             if self._balance == 0:
